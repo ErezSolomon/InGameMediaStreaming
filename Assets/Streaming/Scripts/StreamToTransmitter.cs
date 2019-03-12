@@ -26,7 +26,7 @@ namespace UnityMediaStreaming
         public string VideoCodec { get => _VideoCodec; }
 
         // TODO: Allow to change them also while running?
-        [SerializeField]
+        [SerializeField, ReadOnlyWhilePlaying]
         private TransmittingOptions _TransmittingOptions = new TransmittingOptions(40000000L, 256, 256, 1000, 25, 12);
         public TransmittingOptions TransmittingOptions { get => _TransmittingOptions; set => _TransmittingOptions = value; }
 
