@@ -290,14 +290,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43e64dbff24c8c84bb8e0eb8e5c4e3bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Source: {fileID: 0}
-  _Path: 
+  Source: {fileID: 534669906}
+  _Path: rtmp://localhost/myapp/a
   _Format: 
   _VideoCodec: 
   _TransmittingOptions:
     BitRate: 40000000
-    OutputWidth: 256
-    OutputHeight: 256
+    OutputWidth: 1024
+    OutputHeight: 1024
     FrameUnitsInSec: 1000
     MaxFramerate: 25
     GopSize: 12
@@ -722,6 +722,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64990dd520f031f40ab3cb1616697c43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _Path: 
+  _Path: rtmp://localhost/myapp/test
   _Width: 1024
   _Height: 1024
