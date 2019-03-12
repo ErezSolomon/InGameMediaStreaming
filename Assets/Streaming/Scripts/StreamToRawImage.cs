@@ -2,32 +2,36 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(UnityEngine.UI.RawImage))]
-public class StreamToRawImage : MonoBehaviour {
-    private Texture2D OutputTexture = null;
-    private CaptureScreen PrevSource;
-    public CaptureScreen Source;
-    private UnityEngine.UI.RawImage output;
-
-    void Start ()
+namespace UnityMediaStreaming
+{
+    [RequireComponent(typeof(UnityEngine.UI.RawImage))]
+    public class StreamToRawImage : MonoBehaviour
     {
-        if (Source != null)
-        {
-            if (OutputTexture == null)
-                OutputTexture = new Texture2D(Source.width, Source.height, TextureFormat.RGB24, false);
+        private Texture2D OutputTexture = null;
+        private CaptureScreen PrevSource;
+        public CaptureScreen Source;
+        private UnityEngine.UI.RawImage output;
 
-            Source.OnCapturingTime += Process;
+        void Start()
+        {
+            if (Source != null)
+            {
+                if (OutputTexture == null)
+                    OutputTexture = new Texture2D(Source.Width, Source.Height, TextureFormat.RGB24, false);
+
+                Source.OnCapturingTime += Process;
+            }
+
+            output = GetComponent<UnityEngine.UI.RawImage>();
         }
 
-        output = GetComponent<UnityEngine.UI.RawImage>();
-    }
-
-    private void Process(CaptureScreen.CaptureFunc captureFunc)
-    {
-        if (enabled)
+        private void Process(CaptureScreen.CaptureFunc captureFunc)
         {
-            captureFunc(OutputTexture);
-            output.texture = OutputTexture;
+            if (enabled)
+            {
+                captureFunc(OutputTexture);
+                output.texture = OutputTexture;
+            }
         }
     }
 }

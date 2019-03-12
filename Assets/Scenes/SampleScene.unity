@@ -290,11 +290,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43e64dbff24c8c84bb8e0eb8e5c4e3bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Source: {fileID: 534669906}
-  Path: rtmp://localhost/myapp/a
-  Format: 
-  VideoCodec: 
-  TransmittingOptions:
+  Source: {fileID: 0}
+  _Path: 
+  _Format: 
+  _VideoCodec: 
+  _TransmittingOptions:
     BitRate: 40000000
     OutputWidth: 256
     OutputHeight: 256
@@ -717,11 +717,11 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1912500518}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64990dd520f031f40ab3cb1616697c43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Path: rtmp://localhost/myapp/test
-  Width: 1024
-  Heigth: 1024
+  _Path: 
+  _Width: 1024
+  _Height: 1024
