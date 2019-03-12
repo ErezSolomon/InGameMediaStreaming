@@ -1,0 +1,1 @@
+ffplay  -probesize 32 -sync ext rtmp://localhost/myapp/a
