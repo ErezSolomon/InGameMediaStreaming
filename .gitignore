@@ -7,3 +7,15 @@
 /Assembly-CSharp.csproj
 /Assembly-CSharp-Editor.csproj
 /.vs
+/Tools/nginx-server-gryphon/logs/nginx.pid
+/Tools/nginx-server-gryphon/logs/access.log
+/Tools/nginx-server-gryphon/logs/error.log
+/Tools/nginx-server-gryphon/temp/uwsgi_temp
+/Tools/nginx-server-gryphon/temp/client_body_temp
+/Tools/nginx-server-gryphon/temp/fastcgi_temp
+/Tools/nginx-server-gryphon/temp/proxy_temp
+/Tools/nginx-server-gryphon/temp/scgi_temp
+/Tools/nginx-server-gryphon/logs
+/Tools/nginx-server-gryphon/temp
+/Tools/nginx-server-gryphon/root/dash
+/Tools/nginx-server-gryphon/root/hls
