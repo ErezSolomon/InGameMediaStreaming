@@ -22,9 +22,14 @@ private:
 	// It's very important it will be the last member, because of construction order and since thread is lanched on construction!
 	std::thread m_receiverThread;
 
-	int get_writing_buffer()
+	int get_writing_buffer_number()
 	{
 		return (last_buffer + 1) % 2;
+	}
+
+	AVFrame* get_writing_buffer()
+	{
+		return m_frameBuffers[get_writing_buffer_number()];
 	}
 
 	void swap_buffers(uint64_t frameNumber)
@@ -72,7 +77,7 @@ private:
 
 		// Try to reduce latency and memory
 		//pFormatCtx->flags = AVFMT_FLAG_NOBUFFER | AVFMT_FLAG_FLUSH_PACKETS;// It doesn't work with that!
-		pFormatCtx->flags = AVFMT_FLAG_NOBUFFER;
+		pFormatCtx->flags = AVFMT_FLAG_NOBUFFER;// TODO: Check how helpful is it.
 		// Future TODO: Maybe use NOBLOCK flag? (single threaded non-blocking)
 
 		if (avformat_open_input(&pFormatCtx, m_filePath.c_str(), nullptr, &options) != 0)
@@ -121,6 +126,7 @@ private:
 
 		while (m_threadShouldRun && !isThreadFailed())
 		{
+			// Get a frame from a format context
 			int ret = av_read_frame(pFormatCtx, &packet);
 			if (ret < 0)
 			{
@@ -131,48 +137,40 @@ private:
 
 			if (packet.stream_index == videoIndex)
 			{
-				AVFrame* frameBuffer = m_frameBuffers[get_writing_buffer()];
-				av_frame_unref(frameBuffer);
-
-				int got_picture;
-				int ret = avcodec_decode_video2(pCodecCtx, frameBuffer, &got_picture, &packet);
+				// Send packet to the codec context
+				int ret = avcodec_send_packet(pCodecCtx, &packet);
 				if (ret < 0)
 				{
 					log_error("Decode Error.\n");
 					threadFail();
 					break;
 				}
-				if (got_picture)
+
+				// Read each frame in the packet from the codec context
+				while (ret >= 0)
+				{
+					AVFrame* frameBuffer = get_writing_buffer();
+					ret = avcodec_receive_frame(pCodecCtx, frameBuffer);
+					if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+					{
+						// TODO: Handle better while getting EOF
+						break;// Exit gracfully with no error
+					}
+					// otherwise
+
+					if (ret < 0)
+					{
+						log_error("Decode Error.\n");
+						threadFail();
+						break;
+					}
+					// otherwise
+
 					swap_buffers(++pictureNumber);
+				}
 			}
 
 			av_packet_unref(&packet);
-
-			// An alternative method which doesn't work very well
-			/*AVFrame* frameBuffer = m_frameBuffers[get_writing_buffer()];
-			int ret = avcodec_receive_packet(pCodecCtx, &packet);
-			if (ret < 0)
-			{
-				log_error("FFMPEG error on reading packet. Error number: %d.\n", ret);
-				threadFail();
-				break;
-			}
-
-			if (packet.stream_index == videoIndex)
-			{
-				ret = avcodec_receive_frame(pCodecCtx, frameBuffer);
-				if (ret != 0 && ret != AVERROR(EAGAIN))
-				{
-					log_error("FFMPEG error on reading frame. Error number: %d.\n", ret);
-					threadFail();
-					break;
-				}
-				// otherwise
-
-				swap_buffers(++pictureNumber);
-			}
-
-			av_packet_unref(&packet);*/
 		}
 
 		avcodec_close(pCodecCtx);
