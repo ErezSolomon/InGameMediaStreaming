@@ -4,4 +4,4 @@ mkdir logs
 mkdir root\dash
 mkdir root\hls
 
-nginx -p %CD%
+nginx -p "%CD%"
