@@ -1,0 +1,15 @@
+On that demo you can stream your unity screen out.
+in order to do so we have to do several things.
+
+1. on the scene we add the "CaptureScreen" script to the camera/ use the "CameraStreamer" prefab.
+2. we add the "StreamToTransmiter" prefab to the scene.
+
+on the play time we need a running server in the backround.
+
+we need run RunNginx.bat("UnityMediaStreaming-master\UnityMediaStreaming-master\Tools\nginx-server-gryphon\RunNginx.bat")
+you need to check that the prosses nginx running at the task manneger.
+
+when all of the above is ready we can play are scene.
+
+in order to be sure are stream is working we added a ffmpeg player for you under "rtmp-StreamOut.bat"
+("UnityMediaStreaming-master\UnityMediaStreaming-master\Tools\ffmpeg\þþrtmp-StreamOut.bat")

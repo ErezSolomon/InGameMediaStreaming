@@ -1,0 +1,4 @@
+On that demo you can stream your unity screen out.
+in order to do so we have to do several things.
+
+See the StreamIn and streamOut.
