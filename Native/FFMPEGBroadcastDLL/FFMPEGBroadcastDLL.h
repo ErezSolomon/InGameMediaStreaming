@@ -92,7 +92,7 @@ FFMPEGBROADCASTDLL_API void Transmitter_Destroy(Transmitter* transmitter);
 
 FFMPEGBROADCASTDLL_API bool Transmitter_ShellWriteVideoNow(Transmitter* transmitter, int64_t time_diff);
 
-FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter, int64_t time_diff, int input_width, int input_height, char* rgb_data);
+FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter, int64_t time_diff, int input_width, int input_height, char* rgb_data, FrameInfo* frame_info);
 
 struct Receiver;
 

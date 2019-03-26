@@ -106,7 +106,7 @@ namespace UnityMediaStreaming
 
             [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Transmitter_WriteVideoFrame")]
             [return: MarshalAs(UnmanagedType.I1)]
-            public extern static bool WriteVideoFrame(IntPtr/* Transmitter* */ transmitter, Int64 time_diff, int input_width, int input_height, byte[] rgb_data);
+            public extern static bool WriteVideoFrame(IntPtr/* Transmitter* */ transmitter, Int64 time_diff, int input_width, int input_height, byte[] rgb_data, out FrameInfo frame_info);
         }
 
         public static class Receiver

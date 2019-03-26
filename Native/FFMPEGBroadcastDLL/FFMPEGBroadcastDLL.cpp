@@ -547,7 +547,7 @@ static AVFrame *get_video_frame(OutputStream *ost, int64_t time_diff, char* rgb_
 * encode one video frame and send it to the muxer
 * return 1 when encoding is finished, 0 otherwise
 */
-static int write_video_frame(AVFormatContext *oc, OutputStream *ost, int64_t time_diff, char* rgb_data)
+static int write_video_frame(AVFormatContext *oc, OutputStream *ost, int64_t time_diff, char* rgb_data, FrameInfo* frame_info)
 {
 	int ret;
 	AVCodecContext *c;
@@ -583,6 +583,38 @@ static int write_video_frame(AVFormatContext *oc, OutputStream *ost, int64_t tim
 	if (ret < 0) {
 		log_error("Error while writing video frame: %s\n", av_err2str(ret));
 		exit(1);
+	}
+
+	// TODO: Export this duplicated code(with receiver) to helper functions.
+	if (frame_info != nullptr)
+	{
+		frame_info->width = frame->width;
+		frame_info->height = frame->height;
+		frame_info->nb_samples = frame->nb_samples;
+		frame_info->format = frame->format;
+		frame_info->key_frame = frame->key_frame;
+		frame_info->pict_type = frame->pict_type;
+		frame_info->sample_aspect_ratio_num = frame->sample_aspect_ratio.num;
+		frame_info->sample_aspect_ratio_den = frame->sample_aspect_ratio.den;
+		frame_info->pts = frame->pts;
+		frame_info->pkt_dts = frame->pkt_dts;
+		frame_info->coded_picture_number = frame->coded_picture_number;
+		frame_info->display_picture_number = frame->display_picture_number;
+		frame_info->quality = frame->quality;
+		frame_info->repeat_pict = frame->repeat_pict;
+		frame_info->sample_rate = frame->sample_rate;
+		frame_info->channel_layout = frame->channel_layout;
+		frame_info->flags = frame->flags;
+		frame_info->color_range = frame->color_range;
+		frame_info->color_primaries = frame->color_primaries;
+		frame_info->color_trc = frame->color_trc;
+		frame_info->colorspace = frame->colorspace;
+		frame_info->chroma_location = frame->chroma_location;
+		frame_info->best_effort_timestamp = frame->best_effort_timestamp;
+		frame_info->pkt_pos = frame->pkt_pos;
+		frame_info->pkt_duration = frame->pkt_duration;
+		frame_info->channels = frame->channels;
+		frame_info->pkt_size = frame->pkt_size;
 	}
 
 	return (frame || got_packet) ? 0 : 1;
@@ -739,14 +771,14 @@ FFMPEGBROADCASTDLL_API bool Transmitter_ShellWriteVideoNow(Transmitter* transmit
 	return transmitter->encode_video && shell_write_frame_now(&transmitter->video_st, time_diff);
 }
 
-FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter, int64_t time_diff, int input_width, int input_height, char* rgb_data)
+FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter, int64_t time_diff, int input_width, int input_height, char* rgb_data, FrameInfo* frame_info)
 {
 	OutputStream *ost = &transmitter->video_st;
 	if (input_width != ost->tmp_frame->width || input_height != ost->tmp_frame->height)
 		transmitter_resize_video(transmitter, input_width, input_height);
 
 	if (transmitter->encode_video)
-		transmitter->encode_video = !write_video_frame(transmitter->oc, ost, time_diff, rgb_data);
+		transmitter->encode_video = !write_video_frame(transmitter->oc, ost, time_diff, rgb_data, frame_info);
 
 	return transmitter->encode_video;
 }

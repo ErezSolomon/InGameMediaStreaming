@@ -30,6 +30,10 @@ namespace UnityMediaStreaming
         private TransmittingOptions _TransmittingOptions = new TransmittingOptions(40000000L, 256, 256, 1000, 25, 12);
         public TransmittingOptions TransmittingOptions { get => _TransmittingOptions; set => _TransmittingOptions = value; }
 
+        [SerializeField]
+        private FrameInfo _LastFrameInfo;
+        public FrameInfo LastFrameInfo { get => _LastFrameInfo; }
+
         /*[SerializeField, ReadOnlyWhilePlaying]
         private long _BitRate = 40000000L;
         public long BitRate { get => _BitRate; set => _BitRate = value; }
@@ -143,7 +147,8 @@ namespace UnityMediaStreaming
 
             var pix = OutputTexture.GetRawTextureData();
 
-            if (!CFFMPEGBroadcasting.Transmitter.WriteVideoFrame(_Transmitter, timeDiff, OutputTexture.width, OutputTexture.height, pix))
+            if (!CFFMPEGBroadcasting.Transmitter.WriteVideoFrame(_Transmitter, timeDiff, OutputTexture.width,
+                OutputTexture.height, pix, out _LastFrameInfo))
                 StopStream();
         }
     }
