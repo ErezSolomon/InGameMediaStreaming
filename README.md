@@ -3,7 +3,7 @@ A package for live streaming broadcasting and receiving for Unity
 
 How to start:
 
-* Compile the visual studio project FFMPEGBroadcastDLL at /Native directory. You'll need this in order to 
+* Compile the visual studio project FFMPEGBroadcastDLL at /Native directory **while Unity is closed**. You'll need this in order to 
 * At Assets/UnityMediaStreaming/Scenes there are demo solution for you to explore.
 
 You'll need a local rtmp server(or use Tools/nginx-server-gryphon, see below) running in order to run the examples.
