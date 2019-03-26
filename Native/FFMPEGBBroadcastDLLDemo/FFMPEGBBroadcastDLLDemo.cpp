@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	int count = 0;
 	while (true)
 	{
-		Receiver_GetUpdatedFrame(rec, WIDTH, HEIGHT, texData);
+		Receiver_GetUpdatedFrame(rec, WIDTH, HEIGHT, texData, nullptr);
 		std::cout << "Received frame " << ++count << "\n";
 	}
 

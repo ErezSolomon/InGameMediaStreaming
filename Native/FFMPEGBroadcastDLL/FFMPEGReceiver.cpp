@@ -271,7 +271,7 @@ FFMPEGBROADCASTDLL_API Receiver* Receiver_Create(const char *path)
 	return receiver;
 }
 
-FFMPEGBROADCASTDLL_API bool Receiver_GetUpdatedFrame(Receiver* receiver, int output_width, int output_height, char* rgb_data)
+FFMPEGBROADCASTDLL_API bool Receiver_GetUpdatedFrame(Receiver* receiver, int output_width, int output_height, char* rgb_data, FrameInfo* frame_info)
 {
 	struct SwsContext*& convert_ctx = receiver->getUserConvertCtx();
 
@@ -297,6 +297,37 @@ FFMPEGBROADCASTDLL_API bool Receiver_GetUpdatedFrame(Receiver* receiver, int out
 	}
 
 	av_frame_unref(userFrame);
+
+	if (frame_info != nullptr)
+	{
+		frame_info->width = frame->width;
+		frame_info->height = frame->height;
+		frame_info->nb_samples = frame->nb_samples;
+		frame_info->format = frame->format;
+		frame_info->key_frame = frame->key_frame;
+		frame_info->pict_type = frame->pict_type;
+		frame_info->sample_aspect_ratio_num = frame->sample_aspect_ratio.num;
+		frame_info->sample_aspect_ratio_den = frame->sample_aspect_ratio.den;
+		frame_info->pts = frame->pts;
+		frame_info->pkt_dts = frame->pkt_dts;
+		frame_info->coded_picture_number = frame->coded_picture_number;
+		frame_info->display_picture_number = frame->display_picture_number;
+		frame_info->quality = frame->quality;
+		frame_info->repeat_pict = frame->repeat_pict;
+		frame_info->sample_rate = frame->sample_rate;
+		frame_info->channel_layout = frame->channel_layout;
+		frame_info->flags = frame->flags;
+		frame_info->color_range = frame->color_range;
+		frame_info->color_primaries = frame->color_primaries;
+		frame_info->color_trc = frame->color_trc;
+		frame_info->colorspace = frame->colorspace;
+		frame_info->chroma_location = frame->chroma_location;
+		frame_info->best_effort_timestamp = frame->best_effort_timestamp;
+		frame_info->pkt_pos = frame->pkt_pos;
+		frame_info->pkt_duration = frame->pkt_duration;
+		frame_info->channels = frame->channels;
+		frame_info->pkt_size = frame->pkt_size;
+	}
 
 	receiver->unlockBuffers();
 	return true;

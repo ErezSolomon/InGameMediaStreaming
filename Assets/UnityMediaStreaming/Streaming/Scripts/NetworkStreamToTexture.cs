@@ -25,6 +25,10 @@ namespace UnityMediaStreaming
         private int _Height = 1024;
         public int Height { get => _Height; set => _Height = value; }
 
+        [SerializeField]
+        private FrameInfo _LastFrameInfo;
+        public FrameInfo LastFrameInfo { get => _LastFrameInfo; }
+
         // Used for correctly default fields
         private NetworkStreamToTexture()
         {
@@ -111,7 +115,8 @@ namespace UnityMediaStreaming
                 texData = new byte[Width * Height * 3];
             }
 
-            if (!CFFMPEGBroadcasting.Receiver.GetUpdatedFrame(_Receiver, OutputTexture.width, OutputTexture.height, texData))
+            if (!CFFMPEGBroadcasting.Receiver.GetUpdatedFrame(_Receiver, OutputTexture.width, OutputTexture.height,
+                texData, out _LastFrameInfo))
                 return;
             // otherwise
 

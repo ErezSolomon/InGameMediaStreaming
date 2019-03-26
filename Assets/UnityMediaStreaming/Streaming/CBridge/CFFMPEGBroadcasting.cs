@@ -31,6 +31,39 @@ namespace UnityMediaStreaming
         }
     };
 
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct FrameInfo
+    {
+        public int width;
+        public int height;
+        public int nb_samples;
+        public int format;
+        public int key_frame;
+        public int pict_type;
+        public int sample_aspect_ratio_num;
+        public int sample_aspect_ratio_den;
+        public Int64 pts;
+        public Int64 pkt_dts;
+        public int coded_picture_number;
+        public int display_picture_number;
+        public int quality;
+        public int repeat_pict;
+        public int sample_rate;// (audio)
+        public UInt64 channel_layout;
+        public int flags;
+        public int color_range;
+        public int color_primaries;
+        public int color_trc;
+        public int colorspace;
+        public int chroma_location;
+        public Int64 best_effort_timestamp;
+        public Int64 pkt_pos;
+        public Int64 pkt_duration;
+        public int channels;// (audio)
+        public int pkt_size;
+    };
+
     public static class CFFMPEGBroadcasting
     {
         private static bool logSet = false;
@@ -83,7 +116,7 @@ namespace UnityMediaStreaming
 
             [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Receiver_GetUpdatedFrame")]
             [return: MarshalAs(UnmanagedType.I1)]
-            public extern static bool GetUpdatedFrame(IntPtr/* Receiver* */ receiver, int output_width, int output_height, byte[] rgb_data);
+            public extern static bool GetUpdatedFrame(IntPtr/* Receiver* */ receiver, int output_width, int output_height, byte[] rgb_data, out FrameInfo frame_info);
 
             [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Receiver_Destroy")]
             public extern static void Destroy(IntPtr/* Receiver* */ receiver);

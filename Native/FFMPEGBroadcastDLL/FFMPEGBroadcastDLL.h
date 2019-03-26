@@ -35,6 +35,37 @@ struct TransmittingOptions
 	int gop_size;// e.g. 12 (but has delay)
 };
 
+struct FrameInfo
+{
+	int width;
+	int height;
+	int nb_samples;
+	int format;
+	int key_frame;
+	int pict_type;
+	int sample_aspect_ratio_num;
+	int sample_aspect_ratio_den;
+	int64_t pts;
+	int64_t pkt_dts;
+	int coded_picture_number;
+	int display_picture_number;
+	int quality;
+	int repeat_pict;
+	int sample_rate;// (audio)
+	uint64_t channel_layout;
+	int flags;
+	int color_range;
+	int color_primaries;
+	int color_trc;
+	int colorspace;
+	int chroma_location;
+	int64_t best_effort_timestamp;
+	int64_t pkt_pos;
+	int64_t pkt_duration;
+	int channels;// (audio)
+	int pkt_size;
+};
+
 void call_log_info(const char* message);
 void call_log_error(const char* message);
 
@@ -67,6 +98,6 @@ struct Receiver;
 
 FFMPEGBROADCASTDLL_API Receiver* Receiver_Create(const char *path);
 
-FFMPEGBROADCASTDLL_API bool Receiver_GetUpdatedFrame(Receiver* receiver, int input_width, int input_height, char* rgb_data);
+FFMPEGBROADCASTDLL_API bool Receiver_GetUpdatedFrame(Receiver* receiver, int input_width, int input_height, char* rgb_data, FrameInfo* frame_info);
 
 FFMPEGBROADCASTDLL_API void Receiver_Destroy(Receiver* receiver);
