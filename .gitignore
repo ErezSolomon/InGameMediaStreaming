@@ -20,3 +20,7 @@
 /Tools/nginx-server-gryphon/root/dash
 /Tools/nginx-server-gryphon/root/hls
 /Library
+/Assets/UnityMediaStreaming/Streaming/Plugins/FFMPEGBroadcastDLL.dll.meta
+/Assets/UnityMediaStreaming/Streaming/Plugins/FFMPEGBroadcastDLL.pdb
+/Assets/UnityMediaStreaming/Streaming/Plugins/FFMPEGBroadcastDLL.pdb.meta
+/Assets/UnityMediaStreaming/Streaming/Plugins/FFMPEGBroadcastDLL.dll

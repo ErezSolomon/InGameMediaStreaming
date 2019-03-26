@@ -63,7 +63,7 @@
       <AdditionalDependencies>avutil.lib;avcodec.lib;swresample.lib;swscale.lib;avformat.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>set Local_DEST=..\..\Assets\Streaming\Plugins
+      <Command>set Local_DEST=..\..\Assets\UnityMediaStreaming\Streaming\Plugins
 
 if not exist "%Local_DEST%" (
 echo Creating Directory "%Local_DEST%"...
@@ -95,7 +95,7 @@ copy /y "$(OutDir)$(TargetName).pdb" "%Local_DEST%/$(TargetName).pdb"</Command>
       <AdditionalDependencies>avutil.lib;avcodec.lib;swresample.lib;swscale.lib;avformat.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>set Local_DEST=..\..\Assets\Streaming\Plugins
+      <Command>set Local_DEST=..\..\Assets\UnityMediaStreaming\Streaming\Plugins
 
 if not exist "%Local_DEST%" (
 echo Creating Directory "%Local_DEST%"...
