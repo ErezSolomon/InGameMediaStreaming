@@ -52,8 +52,8 @@ namespace UnityMediaStreaming
         [SerializeField, ReadOnlyWhilePlaying]
         private int _GopSize = 12;
         public int GopSize { get => _GopSize; set => _GopSize = value; }*/
-
-        private Int64 _StartingTime = 0;
+        
+        private System.Diagnostics.Stopwatch _clock = new System.Diagnostics.Stopwatch();
 
         // Used for correctly default fields
         private StreamToTransmitter()
@@ -100,19 +100,20 @@ namespace UnityMediaStreaming
         // Start stream if haven't already
         private void StartStream()
         {
-            if (_StartingTime != 0)
+            if (_clock.IsRunning)
                 return;// Already started
                        // otherwise
 
             _Transmitter = CFFMPEGBroadcasting.Transmitter.Create(Path, (Format.Length == 0 ? null : Format), (VideoCodec.Length == 0 ? null : VideoCodec),
                     Source.Width, Source.Height, TransmittingOptions, 0, null, null);
-            _StartingTime = CFFMPEGBroadcasting.GetMicrosecondsTimeRelative();
+
+            _clock.Restart();
         }
 
         // Stop stream if haven't already
         private void StopStream()
         {
-            _StartingTime = 0;
+            _clock.Stop();
 
             if (_Transmitter != IntPtr.Zero)
             {
@@ -135,9 +136,8 @@ namespace UnityMediaStreaming
             if (_Transmitter == IntPtr.Zero)
                 return;
             // otherwise
-
-            Int64 currentTime = CFFMPEGBroadcasting.GetMicrosecondsTimeRelative();
-            Int64 timeDiff = currentTime - _StartingTime;
+            
+            Int64 timeDiff = (_clock.ElapsedTicks * 1000000) / System.Diagnostics.Stopwatch.Frequency;
 
             if (!CFFMPEGBroadcasting.Transmitter.ShellWriteVideoNow(_Transmitter, timeDiff))
                 return;

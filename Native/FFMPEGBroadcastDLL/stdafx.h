@@ -28,6 +28,8 @@
 #include <atomic>
 #include <algorithm>
 
+#include <chrono>
+
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>

@@ -7,6 +7,8 @@
 
 #include "FFMPEGBroadcastDLL.h"
 
+using namespace std::literals;
+
 
 int FINITE = 0;
 #define INTERLEAVED_WRITE 1
@@ -815,5 +817,24 @@ FFMPEGBROADCASTDLL_API void Transmitter_Destroy(Transmitter* transmitter)
 
 FFMPEGBROADCASTDLL_API int64_t GetMicrosecondsTimeRelative()
 {
+	// TODO: Properly test timestamps
 	return av_gettime_relative();
+#if 0
+#if defined(_MSC_VER)
+	LARGE_INTEGER now;
+	LARGE_INTEGER freq;
+
+	QueryPerformanceFrequency(&freq);
+	QueryPerformanceCounter(&now);
+
+	int64_t result = (now.QuadPart * 1000000) / freq.QuadPart;
+
+	return result;
+#else
+
+	using Clock = std::chrono::steady_clock;
+	auto diff = Clock::now().time_since_epoch();
+	return diff / 1us;
+#endif
+#endif
 }
