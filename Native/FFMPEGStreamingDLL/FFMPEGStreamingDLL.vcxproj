@@ -13,8 +13,9 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{625154F6-43C7-4C51-91F9-B61F4603C758}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>FFMPEGBroadcastDLL</RootNamespace>
+    <RootNamespace>FFMPEGStreamingDLL</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>FFMPEGStreamingDLL</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -117,8 +118,8 @@ copy /y "$(OutDir)$(TargetName).pdb" "%Local_DEST%/$(TargetName).pdb"</Command>
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FFMPEGBroadcastDLL.cpp" />
-    <ClCompile Include="FFMPEGReceiver.cpp" />
+    <ClCompile Include="FFMPEGBOutput.cpp" />
+    <ClCompile Include="FFMPEGInput.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

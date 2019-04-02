@@ -85,40 +85,40 @@ namespace UnityMediaStreaming
             }
         }
 
-        [DllImport("FFMPEGBroadcastDLL", CallingConvention = CallingConvention.Cdecl, EntryPoint = "SetLogCallback")]
+        [DllImport("FFMPEGStreamingDLL", CallingConvention = CallingConvention.Cdecl, EntryPoint = "SetLogCallback")]
         private extern static void SetLogCallbackInternal(LogCallback log_callback);
 
-        [DllImport("FFMPEGBroadcastDLL", EntryPoint = "GetMicrosecondsTimeRelative")]
+        [DllImport("FFMPEGStreamingDLL", EntryPoint = "GetMicrosecondsTimeRelative")]
         public extern static Int64 GetMicrosecondsTimeRelative();
 
         public static class Transmitter
         {
-            [DllImport("FFMPEGBroadcastDLL", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Transmitter_Create")]
+            [DllImport("FFMPEGStreamingDLL", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Transmitter_Create")]
             public extern static IntPtr/* Transmitter* */ Create(string path, string format, string video_codec, int input_width, int input_height,
             TransmittingOptions options, int dict_count, string[] dict_keys, string[] dict_vals);
 
-            [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Transmitter_Destroy")]
+            [DllImport("FFMPEGStreamingDLL", EntryPoint = "Transmitter_Destroy")]
             public extern static void Destroy(IntPtr/* Transmitter* */ transmitter);
 
-            [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Transmitter_ShellWriteVideoNow")]
+            [DllImport("FFMPEGStreamingDLL", EntryPoint = "Transmitter_ShellWriteVideoNow")]
             [return: MarshalAs(UnmanagedType.I1)]
             public extern static bool ShellWriteVideoNow(IntPtr/* Transmitter* */ transmitter, Int64 time_diff);
 
-            [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Transmitter_WriteVideoFrame")]
+            [DllImport("FFMPEGStreamingDLL", EntryPoint = "Transmitter_WriteVideoFrame")]
             [return: MarshalAs(UnmanagedType.I1)]
             public extern static bool WriteVideoFrame(IntPtr/* Transmitter* */ transmitter, Int64 time_diff, int input_width, int input_height, byte[] rgb_data, out FrameInfo frame_info);
         }
 
         public static class Receiver
         {
-            [DllImport("FFMPEGBroadcastDLL", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Receiver_Create")]
+            [DllImport("FFMPEGStreamingDLL", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Receiver_Create")]
             public extern static IntPtr/* Receiver* */ Create(string path);
 
-            [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Receiver_GetUpdatedFrame")]
+            [DllImport("FFMPEGStreamingDLL", EntryPoint = "Receiver_GetUpdatedFrame")]
             [return: MarshalAs(UnmanagedType.I1)]
             public extern static bool GetUpdatedFrame(IntPtr/* Receiver* */ receiver, int output_width, int output_height, byte[] rgb_data, out FrameInfo frame_info);
 
-            [DllImport("FFMPEGBroadcastDLL", EntryPoint = "Receiver_Destroy")]
+            [DllImport("FFMPEGStreamingDLL", EntryPoint = "Receiver_Destroy")]
             public extern static void Destroy(IntPtr/* Receiver* */ receiver);
         }
     }
