@@ -1,4 +1,4 @@
-# UnityMediaStreaming
+# InGameMediaStreaming
 A package for live streaming broadcasting and receiving for Unity
 
 How to start:
