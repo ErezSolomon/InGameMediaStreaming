@@ -145,15 +145,20 @@ int main(int argc, char* argv[])
 
 	//av_seek_frame(pFormatCtx, videoindex, 1000000, 0);
 
+	bool alive = true;
+
 	//SDL End----------------------
-	while (av_read_frame(pFormatCtx, packet) >= 0) {
+	while (alive && av_read_frame(pFormatCtx, packet) >= 0) {
 		SDL_Event event;
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_ESCAPE)
+					alive = false;
 				break;
 			case SDL_QUIT:
+				alive = false;
 				break;
 			}
 		}
