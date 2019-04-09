@@ -39,13 +39,13 @@ struct OutputStream {
 };
 
 struct Transmitter {
-	OutputStream video_st/*, audio_st*/;
+	OutputStream video_st, audio_st;
 	std::string filename;
 	AVOutputFormat *fmt;
 	AVFormatContext *oc;
-	AVCodec /**audio_codec,*/ *video_codec;
-	int have_video/*, have_audio*/;
-	int encode_video/*, encode_audio*/;
+	AVCodec *audio_codec, *video_codec;
+	int have_video, have_audio;
+	int encode_video, encode_audio;
 	AVDictionary *opt;
 };
 
@@ -232,7 +232,6 @@ static void add_stream(OutputStream *ost, AVFormatContext *oc,
 		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 }
 
-#ifdef WHEN_AUDIO_REQUIRED
 /**************************************************************/
 /* audio output */
 
@@ -329,7 +328,7 @@ static void open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, A
 
 /* Prepare a 16 bit dummy audio frame of 'frame_size' samples and
 * 'nb_channels' channels. */
-static AVFrame *get_audio_frame(OutputStream *ost)
+static AVFrame *get_audio_frame(OutputStream *ost, int64_t time_diff)
 {
 	AVFrame *frame = ost->tmp_frame;
 	int j, i, v;
@@ -339,7 +338,13 @@ static AVFrame *get_audio_frame(OutputStream *ost)
 		return NULL;
 
 	for (j = 0; j <frame->nb_samples; j++) {
-		v = (int)(sin(ost->t) * 10000);
+		//v = (int)(sin(ost->t) * 10000);
+
+		AVCodecContext* c = ost->enc;
+		int64_t timePoint = time_diff + av_rescale_q(j * 1000000, c->time_base, av_make_q(1, c->sample_rate));
+		av_rescale_q(ost->samples_count, av_make_q(1, 1), c->time_base);
+		int bias = timePoint / 1000000.0;
+		v = (int)(sin(bias) * 10000);
 		for (i = 0; i < ost->enc->channels; i++)
 			*q++ = v;
 		ost->t += ost->tincr;
@@ -356,7 +361,7 @@ static AVFrame *get_audio_frame(OutputStream *ost)
 * encode one audio frame and send it to the muxer
 * return 1 when encoding is finished, 0 otherwise
 */
-static int write_audio_frame(AVFormatContext *oc, OutputStream *ost)
+static int write_audio_frame(AVFormatContext *oc, OutputStream *ost, int64_t time_diff)
 {
 	AVCodecContext *c;
 	AVPacket pkt = { 0 }; // data and size must be 0;
@@ -368,7 +373,7 @@ static int write_audio_frame(AVFormatContext *oc, OutputStream *ost)
 	av_init_packet(&pkt);
 	c = ost->enc;
 
-	frame = get_audio_frame(ost);
+	frame = get_audio_frame(ost, time_diff);
 
 	if (frame) {
 		/* convert samples from native format to destination codec format, using the resampler */
@@ -395,7 +400,7 @@ static int write_audio_frame(AVFormatContext *oc, OutputStream *ost)
 		}
 		frame = ost->frame;
 
-		frame->pts = av_rescale_q(ost->samples_count, (AVRational) { 1, c->sample_rate }, c->time_base);
+		frame->pts = av_rescale_q(ost->samples_count, av_make_q(1, c->sample_rate), c->time_base);
 		ost->samples_count += dst_nb_samples;
 	}
 
@@ -416,7 +421,6 @@ static int write_audio_frame(AVFormatContext *oc, OutputStream *ost)
 
 	return (frame || got_packet) ? 0 : 1;
 }
-#endif
 
 /**************************************************************/
 /* video output */
@@ -655,6 +659,7 @@ FFMPEGBROADCASTDLL_API void SetLogCallback(LogCallback log_callback)
 	::log_callback = log_callback;
 }
 
+// TODO: Split streams in a separate function
 Transmitter* Transmitter_TryCreate(const char *path, const char *format, const char* video_codec_name, int width, int height,
 	TransmittingOptions options, const int dict_count, const char *dict_keys[], const char *dict_vals[])
 {
@@ -677,7 +682,7 @@ Transmitter* Transmitter_TryCreate(const char *path, const char *format, const c
 	//OutputStream video_st = { 0 }, audio_st = { 0 };
 
 	std::memset(&transmitter->video_st, 0, sizeof(OutputStream));
-	//std::memset(&transsmitter->audio_st, 0, sizeof(OutputStream));
+	std::memset(&transmitter->audio_st, 0, sizeof(OutputStream));
 
 	//AVCodec *audio_codec, *video_codec;
 	//int ret;
@@ -717,11 +722,22 @@ Transmitter* Transmitter_TryCreate(const char *path, const char *format, const c
 		transmitter->have_video = 1;
 		transmitter->encode_video = 1;
 	}
-	/*if (fmt->audio_codec != AV_CODEC_ID_NONE) {
-	add_stream(&audio_st, oc, &audio_codec, fmt->audio_codec);
-	have_audio = 1;
-	encode_audio = 1;
-	}*/
+	else
+	{
+		transmitter->have_video = 0;
+		transmitter->encode_video = 0;
+	}
+
+	if (options.has_audio && transmitter->fmt->audio_codec != AV_CODEC_ID_NONE) {
+		add_stream(&transmitter->audio_st, transmitter->oc, &transmitter->audio_codec, nullptr, transmitter->fmt->audio_codec, options/*Very bad! remove this*/);
+		transmitter->have_audio = 1;
+		transmitter->encode_audio = 1;
+	}
+	else
+	{
+		transmitter->have_audio = 0;
+		transmitter->encode_audio = 0;
+	}
 
 	/* Now that all the parameters are set, we can open the audio and
 	* video codecs and allocate the necessary encode buffers. */
@@ -731,8 +747,8 @@ Transmitter* Transmitter_TryCreate(const char *path, const char *format, const c
 		transmitter_resize_video(transmitter.get(), width, height);
 	}
 
-	/*if (transsmitter->have_audio)
-	open_audio(transsmitter->oc, transsmitter->audio_codec, &transsmitter->audio_st, transsmitter->opt);*/
+	if (transmitter->have_audio)
+		open_audio(transmitter->oc, transmitter->audio_codec, &transmitter->audio_st, transmitter->opt);
 
 	av_dump_format(transmitter->oc, 0, path, 1);
 
@@ -790,6 +806,21 @@ FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter
 	return transmitter->encode_video;
 }
 
+FFMPEGBROADCASTDLL_API bool Transmitter_ShellWriteAudioNow(Transmitter* transmitter, int64_t time_diff)
+{
+	return transmitter->encode_video && shell_write_frame_now(&transmitter->audio_st, time_diff);
+}
+
+FFMPEGBROADCASTDLL_API bool Transmitter_WriteAudioFrame(Transmitter* transmitter, int64_t time_diff, int length, char* data, FrameInfo* frame_info)
+{
+	OutputStream *ost = &transmitter->audio_st;
+
+	if (transmitter->encode_video)
+		transmitter->encode_video = !write_audio_frame(transmitter->oc, ost, time_diff/*, rgb_data, frame_info*/);
+
+	return transmitter->encode_video;
+}
+
 FFMPEGBROADCASTDLL_API void Transmitter_Destroy(Transmitter* transmitter)
 {
 	if (transmitter == nullptr)
@@ -807,8 +838,9 @@ FFMPEGBROADCASTDLL_API void Transmitter_Destroy(Transmitter* transmitter)
 	/* Close each codec. */
 	if (transmitter->have_video)
 		close_stream(transmitter->oc, &transmitter->video_st);
-	/*if (transsmitter->have_audio)
-		close_stream(transsmitter->oc, &transsmitter->audio_st);*/
+
+	if (transmitter->have_audio)
+		close_stream(transmitter->oc, &transmitter->audio_st);
 
 	if (!(transmitter->fmt->flags & AVFMT_NOFILE))
 		/* Close the output file. */

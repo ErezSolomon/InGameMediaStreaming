@@ -19,8 +19,11 @@ namespace UnityMediaStreaming
         public int MaxFramerate;// e.g. 25
         public int GopSize;// e.g. 12
 
+        [MarshalAs(UnmanagedType.I1)]
+        public bool HasAudio;
+
         public TransmittingOptions(long BitRate = 40000000L, int OutputWidth = 256, int OutputHeight = 256, int FrameUnitsInSec = 1000, int MaxFramerate = 25,
-            int GopSize = 12)
+            int GopSize = 12, bool HasAudio = false)
         {
             this.BitRate = BitRate;
             this.OutputWidth = OutputWidth;
@@ -28,6 +31,7 @@ namespace UnityMediaStreaming
             this.FrameUnitsInSec = FrameUnitsInSec;
             this.MaxFramerate = MaxFramerate;
             this.GopSize = GopSize;
+            this.HasAudio = HasAudio;
         }
     };
 

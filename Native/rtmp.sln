@@ -30,6 +30,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Output", "Output", "{FB63BD9A-91EE-421C-990E-EAF285A0751C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BasicOutputDemo", "BasicOutputDemo\BasicOutputDemo.vcxproj", "{77A3332F-98B7-41B7-9A43-FD1E40E6453A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{625154F6-43C7-4C51-91F9-B61F4603C758} = {625154F6-43C7-4C51-91F9-B61F4603C758}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

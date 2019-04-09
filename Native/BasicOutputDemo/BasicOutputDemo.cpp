@@ -44,16 +44,24 @@ int main(int argc, char* argv[])
 	options.frame_units_in_sec = 1000;
 	options.max_framerate = 60;
 	options.gop_size = 12;
+	options.has_audio = true;
 
 	Transmitter* transmitter = Transmitter_Create(filename, format, codec, WIDTH, HEIGHT, options, 0, nullptr, nullptr);
 	
 	int64_t startTime = GetMicrosecondsTimeRelative();
 	int64_t count = 0;
+	int64_t count_audio = 0;
 
 	while (true)
 	{
 		int64_t currentTime = GetMicrosecondsTimeRelative();
 		int64_t timeDiff = currentTime - startTime;
+
+		if (Transmitter_ShellWriteAudioNow(transmitter, timeDiff))
+		{
+			if (!Transmitter_WriteAudioFrame(transmitter, timeDiff, 0, nullptr, nullptr))
+				break;
+		}
 
 		if (Transmitter_ShellWriteVideoNow(transmitter, timeDiff))
 		{
@@ -63,7 +71,7 @@ int main(int argc, char* argv[])
 				break;
 			// otherwise
 
-			std::cout << "Transmitted frame " << ++count << "\n";
+			std::cout << "Transmitted video frame " << ++count << "\n";
 			// TODO: Get and print frame data
 		}
 	}

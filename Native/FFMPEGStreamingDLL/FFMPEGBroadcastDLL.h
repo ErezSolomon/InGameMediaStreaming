@@ -33,6 +33,7 @@ struct TransmittingOptions
 	int frame_units_in_sec;// e.g. 1000
 	int max_framerate;// e.g. 25
 	int gop_size;// e.g. 12 (but has delay)
+	bool has_audio;// TODO: Remove it and saperate to streams
 };
 
 struct FrameInfo
@@ -93,6 +94,10 @@ FFMPEGBROADCASTDLL_API void Transmitter_Destroy(Transmitter* transmitter);
 FFMPEGBROADCASTDLL_API bool Transmitter_ShellWriteVideoNow(Transmitter* transmitter, int64_t time_diff);
 
 FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter, int64_t time_diff, int input_width, int input_height, char* rgb_data, FrameInfo* frame_info);
+
+FFMPEGBROADCASTDLL_API bool Transmitter_ShellWriteAudioNow(Transmitter* transmitter, int64_t time_diff);
+
+FFMPEGBROADCASTDLL_API bool Transmitter_WriteAudioFrame(Transmitter* transmitter, int64_t time_diff, int length, char* data, FrameInfo* frame_info);
 
 struct Receiver;
 

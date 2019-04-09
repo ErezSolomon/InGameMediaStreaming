@@ -27,7 +27,7 @@ namespace UnityMediaStreaming
 
         // TODO: Allow to change them also while running?
         [SerializeField, ReadOnlyWhilePlaying]
-        private TransmittingOptions _TransmittingOptions = new TransmittingOptions(40000000L, 256, 256, 1000, 25, 12);
+        private TransmittingOptions _TransmittingOptions = new TransmittingOptions();
         public TransmittingOptions TransmittingOptions { get => _TransmittingOptions; set => _TransmittingOptions = value; }
 
         [SerializeField]
