@@ -93,6 +93,41 @@ static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt)
 		pkt->stream_index);
 }
 
+// TODO: Export this duplicated code(with receiver) to helper functions.
+static void write_frame_info(const AVFrame* frame, FrameInfo* frame_info)
+{
+	if (frame_info != nullptr)
+	{
+		frame_info->width = frame->width;
+		frame_info->height = frame->height;
+		frame_info->nb_samples = frame->nb_samples;
+		frame_info->format = frame->format;
+		frame_info->key_frame = frame->key_frame;
+		frame_info->pict_type = frame->pict_type;
+		frame_info->sample_aspect_ratio_num = frame->sample_aspect_ratio.num;
+		frame_info->sample_aspect_ratio_den = frame->sample_aspect_ratio.den;
+		frame_info->pts = frame->pts;
+		frame_info->pkt_dts = frame->pkt_dts;
+		frame_info->coded_picture_number = frame->coded_picture_number;
+		frame_info->display_picture_number = frame->display_picture_number;
+		frame_info->quality = frame->quality;
+		frame_info->repeat_pict = frame->repeat_pict;
+		frame_info->sample_rate = frame->sample_rate;
+		frame_info->channel_layout = frame->channel_layout;
+		frame_info->flags = frame->flags;
+		frame_info->color_range = frame->color_range;
+		frame_info->color_primaries = frame->color_primaries;
+		frame_info->color_trc = frame->color_trc;
+		frame_info->colorspace = frame->colorspace;
+		frame_info->chroma_location = frame->chroma_location;
+		frame_info->best_effort_timestamp = frame->best_effort_timestamp;
+		frame_info->pkt_pos = frame->pkt_pos;
+		frame_info->pkt_duration = frame->pkt_duration;
+		frame_info->channels = frame->channels;
+		frame_info->pkt_size = frame->pkt_size;
+	}
+}
+
 static int shell_end(OutputStream *ost)
 {
 	AVCodecContext *c = ost->enc;
@@ -170,7 +205,7 @@ static void add_stream(OutputStream *ost, AVFormatContext *oc,
 		c->sample_fmt = (*codec)->sample_fmts ?
 			(*codec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
 		c->bit_rate = 64000;
-		c->sample_rate = 44100;
+		c->sample_rate = /*44100*/4000;
 		if ((*codec)->supported_samplerates) {
 			c->sample_rate = (*codec)->supported_samplerates[0];
 			for (i = 0; (*codec)->supported_samplerates[i]; i++) {
@@ -328,7 +363,7 @@ static void open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, A
 
 /* Prepare a 16 bit dummy audio frame of 'frame_size' samples and
 * 'nb_channels' channels. */
-static AVFrame *get_audio_frame(OutputStream *ost, int64_t time_diff)
+static AVFrame *get_audio_frame(OutputStream *ost, int64_t time_diff, int sample_count, char* sample_data)
 {
 	AVFrame *frame = ost->tmp_frame;
 	int j, i, v;
@@ -337,18 +372,20 @@ static AVFrame *get_audio_frame(OutputStream *ost, int64_t time_diff)
 	if (shell_end(ost))
 		return NULL;
 
-	for (j = 0; j <frame->nb_samples; j++) {
+	for (j = ost->samples_count; j < ost->samples_count + frame->nb_samples; j++) {
 		//v = (int)(sin(ost->t) * 10000);
+		//ost->t += ost->tincr;
+		//ost->tincr += ost->tincr2;
 
 		AVCodecContext* c = ost->enc;
-		int64_t timePoint = time_diff + av_rescale_q(j * 1000000, c->time_base, av_make_q(1, c->sample_rate));
-		av_rescale_q(ost->samples_count, av_make_q(1, 1), c->time_base);
-		int bias = timePoint / 1000000.0;
+
+		int64_t bias = av_rescale_q(j, c->time_base, av_make_q(1, c->sample_rate));
+
+		// TODO: Use sample_data instead, and chop&report sample_count data as needed
+
 		v = (int)(sin(bias) * 10000);
 		for (i = 0; i < ost->enc->channels; i++)
 			*q++ = v;
-		ost->t += ost->tincr;
-		ost->tincr += ost->tincr2;
 	}
 
 	frame->pts = ost->next_pts;
@@ -361,7 +398,8 @@ static AVFrame *get_audio_frame(OutputStream *ost, int64_t time_diff)
 * encode one audio frame and send it to the muxer
 * return 1 when encoding is finished, 0 otherwise
 */
-static int write_audio_frame(AVFormatContext *oc, OutputStream *ost, int64_t time_diff)
+static int write_audio_frame(AVFormatContext *oc, OutputStream *ost, int64_t time_diff,
+	int sample_count, char* sample_data, FrameInfo* frame_info)
 {
 	AVCodecContext *c;
 	AVPacket pkt = { 0 }; // data and size must be 0;
@@ -373,7 +411,7 @@ static int write_audio_frame(AVFormatContext *oc, OutputStream *ost, int64_t tim
 	av_init_packet(&pkt);
 	c = ost->enc;
 
-	frame = get_audio_frame(ost, time_diff);
+	frame = get_audio_frame(ost, time_diff, sample_count, sample_data);
 
 	if (frame) {
 		/* convert samples from native format to destination codec format, using the resampler */
@@ -418,6 +456,8 @@ static int write_audio_frame(AVFormatContext *oc, OutputStream *ost, int64_t tim
 			exit(1);
 		}
 	}
+
+	write_frame_info(frame, frame_info);
 
 	return (frame || got_packet) ? 0 : 1;
 }
@@ -596,37 +636,7 @@ static int write_video_frame(AVFormatContext *oc, OutputStream *ost, int64_t tim
 		exit(1);
 	}
 
-	// TODO: Export this duplicated code(with receiver) to helper functions.
-	if (frame_info != nullptr)
-	{
-		frame_info->width = frame->width;
-		frame_info->height = frame->height;
-		frame_info->nb_samples = frame->nb_samples;
-		frame_info->format = frame->format;
-		frame_info->key_frame = frame->key_frame;
-		frame_info->pict_type = frame->pict_type;
-		frame_info->sample_aspect_ratio_num = frame->sample_aspect_ratio.num;
-		frame_info->sample_aspect_ratio_den = frame->sample_aspect_ratio.den;
-		frame_info->pts = frame->pts;
-		frame_info->pkt_dts = frame->pkt_dts;
-		frame_info->coded_picture_number = frame->coded_picture_number;
-		frame_info->display_picture_number = frame->display_picture_number;
-		frame_info->quality = frame->quality;
-		frame_info->repeat_pict = frame->repeat_pict;
-		frame_info->sample_rate = frame->sample_rate;
-		frame_info->channel_layout = frame->channel_layout;
-		frame_info->flags = frame->flags;
-		frame_info->color_range = frame->color_range;
-		frame_info->color_primaries = frame->color_primaries;
-		frame_info->color_trc = frame->color_trc;
-		frame_info->colorspace = frame->colorspace;
-		frame_info->chroma_location = frame->chroma_location;
-		frame_info->best_effort_timestamp = frame->best_effort_timestamp;
-		frame_info->pkt_pos = frame->pkt_pos;
-		frame_info->pkt_duration = frame->pkt_duration;
-		frame_info->channels = frame->channels;
-		frame_info->pkt_size = frame->pkt_size;
-	}
+	write_frame_info(frame, frame_info);
 
 	return (frame || got_packet) ? 0 : 1;
 }
@@ -808,15 +818,15 @@ FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter
 
 FFMPEGBROADCASTDLL_API bool Transmitter_ShellWriteAudioNow(Transmitter* transmitter, int64_t time_diff)
 {
-	return transmitter->encode_video && shell_write_frame_now(&transmitter->audio_st, time_diff);
+	return transmitter->encode_audio && shell_write_frame_now(&transmitter->audio_st, time_diff);
 }
 
-FFMPEGBROADCASTDLL_API bool Transmitter_WriteAudioFrame(Transmitter* transmitter, int64_t time_diff, int length, char* data, FrameInfo* frame_info)
+FFMPEGBROADCASTDLL_API bool Transmitter_WriteAudioFrame(Transmitter* transmitter, int64_t time_diff, int sample_count, char* sample_data, FrameInfo* frame_info)
 {
 	OutputStream *ost = &transmitter->audio_st;
 
 	if (transmitter->encode_video)
-		transmitter->encode_video = !write_audio_frame(transmitter->oc, ost, time_diff/*, rgb_data, frame_info*/);
+		transmitter->encode_video = !write_audio_frame(transmitter->oc, ost, time_diff, sample_count, sample_data, frame_info);
 
 	return transmitter->encode_video;
 }

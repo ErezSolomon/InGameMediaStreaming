@@ -97,7 +97,7 @@ FFMPEGBROADCASTDLL_API bool Transmitter_WriteVideoFrame(Transmitter* transmitter
 
 FFMPEGBROADCASTDLL_API bool Transmitter_ShellWriteAudioNow(Transmitter* transmitter, int64_t time_diff);
 
-FFMPEGBROADCASTDLL_API bool Transmitter_WriteAudioFrame(Transmitter* transmitter, int64_t time_diff, int length, char* data, FrameInfo* frame_info);
+FFMPEGBROADCASTDLL_API bool Transmitter_WriteAudioFrame(Transmitter* transmitter, int64_t time_diff, int sample_count, char* sample_data, FrameInfo* frame_info);
 
 struct Receiver;
 

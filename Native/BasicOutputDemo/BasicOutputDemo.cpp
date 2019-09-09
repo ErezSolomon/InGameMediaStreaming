@@ -57,10 +57,12 @@ int main(int argc, char* argv[])
 		int64_t currentTime = GetMicrosecondsTimeRelative();
 		int64_t timeDiff = currentTime - startTime;
 
-		if (Transmitter_ShellWriteAudioNow(transmitter, timeDiff))
+		while (Transmitter_ShellWriteAudioNow(transmitter, timeDiff))
 		{
 			if (!Transmitter_WriteAudioFrame(transmitter, timeDiff, 0, nullptr, nullptr))
 				break;
+
+			std::cout << "Transmitted audio frame " << ++count_audio << "\n";
 		}
 
 		if (Transmitter_ShellWriteVideoNow(transmitter, timeDiff))
